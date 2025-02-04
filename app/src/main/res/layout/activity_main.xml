@@ -11,7 +11,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="412dp"
         android:layout_height="76dp"
-        android:background="@color/navbar_background"
+        android:background="#FFFFFF"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,31 +21,25 @@
         app:layout_constraintVertical_bias="1.0">
 
         <ImageButton
-            android:id="@+id/ContactButton"
-            android:layout_width="382dp"
-            android:layout_height="74dp"
+            android:id="@+id/imageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:contentDescription="is where the contact list is"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/contact_list_image" />
+            app:srcCompat="@drawable/contactlistimage" />
 
         <ImageButton
-            android:id="@+id/MapButton"
+            android:id="@+id/imageButton2"
             android:layout_width="wrap_content"
-            android:layout_height="74dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:contentDescription="is the map for the contact"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/maps_icon_16" />
+            app:srcCompat="@drawable/mapsimage" />
 
         <ImageButton
-            android:id="@+id/SettingButton"
+            android:id="@+id/imageButton3"
             android:layout_width="wrap_content"
-            android:layout_height="73dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:contentDescription="is the setting for change contact"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/setting_icon" />
+            app:srcCompat="@drawable/settingicon" />
     </LinearLayout>
 
     <EditText
@@ -257,7 +251,7 @@
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/toolbar_background"
+            android:background="#FBFBFB"
             android:orientation="horizontal">
 
             <ToggleButton
