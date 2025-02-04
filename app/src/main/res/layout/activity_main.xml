@@ -11,7 +11,7 @@
         android:id="@+id/linearLayout"
         android:layout_width="412dp"
         android:layout_height="76dp"
-        android:background="#FFFFFF"
+        android:background="#0D0C0C"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,9 +22,11 @@
 
         <ImageButton
             android:id="@+id/ContactButton"
-            android:layout_width="wrap_content"
+            android:layout_width="363dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:backgroundTint="#4CAF50"
+            android:scaleType="fitCenter"
             app:srcCompat="@drawable/contactlistimage" />
 
         <ImageButton
@@ -32,13 +34,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:backgroundTint="#FFEB3B"
+            android:scaleType="fitCenter"
             app:srcCompat="@drawable/mapsimage" />
 
         <ImageButton
             android:id="@+id/SettingButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="358dp"
+            android:layout_height="match_parent"
             android:layout_weight="1"
+            android:backgroundTint="#F44336"
+            android:scaleType="fitCenter"
             app:srcCompat="@drawable/settingicon" />
     </LinearLayout>
 
@@ -251,7 +257,7 @@
             android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FBFBFB"
+            android:background="#4CAF50"
             android:orientation="horizontal">
 
             <ToggleButton
@@ -270,6 +276,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="32dp"
                 android:layout_weight="1"
+                android:backgroundTint="#0B0B0B"
                 android:text="Save" />
         </LinearLayout>
     </LinearLayout>
@@ -278,6 +285,7 @@
         android:id="@+id/ChangeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:backgroundTint="#0B0B0B"
         android:text="CHANGE"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
