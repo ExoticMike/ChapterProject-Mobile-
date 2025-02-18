@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         initToggleButton();
         setForEdit(false);
         initTextChangedEvents();
+        initSaveButton();
+        initChangeButton();
 
         editName = findViewById(R.id.editName);
         editTextCity = findViewById(R.id.editTextCity);
@@ -56,6 +58,40 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         editTextCellNumber = findViewById(R.id.editTextCellNumber);
         editTextEmail = findViewById(R.id.editTextEmail);
 
+    }
+    private void initSaveButton() {
+        Button saveButton = findViewById((R.id.buttonSave));
+        saveButton.setOnClickListener(s -> {
+            boolean wasSuccessful;
+            ContactDataSource ds = new ContactDataSource(MainActivity.this);
+            try {
+                ds.open();
+
+                if (currentContact.getContactID() == -1) {
+                    wasSuccessful = ds.insertContact(currentContact);
+                }
+                else {
+                    wasSuccessful = ds.updateContact(currentContact);
+                }
+                ds.close();
+            }
+            catch (Exception e) {
+                wasSuccessful = false;
+            }
+
+            if (wasSuccessful) {
+                ToggleButton editToggle = findViewById(R.id.onOffButton);
+                editToggle.toggle();
+                setForEdit(false);
+            }
+        } );
+    }
+    private void initChangeButton(){
+        Button changeButton = findViewById(R.id.ChangeButton);
+        changeButton.setOnClickListener(m -> {
+            DatePickerDialogue datePickerDialogue = new DatePickerDialogue();
+            datePickerDialogue.show(getSupportFragmentManager(), "date picker");
+        });
     }
     private void initContactButton() {
         ImageButton ContactButton = findViewById(R.id.ContactButton);
@@ -141,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
 
             @Override
             public void afterTextChanged(Editable s) {
-                currentContact.setContactName(etStreetAddress.getText().toString());
+                currentContact.setStreetAddress(etStreetAddress.getText().toString());
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
@@ -157,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
 
             @Override
             public void afterTextChanged(Editable s) {
-                currentContact.setContactName(etCity.getText().toString());
+                currentContact.setCity(etCity.getText().toString());
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
@@ -173,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
 
             @Override
             public void afterTextChanged(Editable s) {
-                currentContact.setContactName(etState.getText().toString());
+                currentContact.setState(etState.getText().toString());
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
@@ -189,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
 
             @Override
             public void afterTextChanged(Editable s) {
-                currentContact.setContactName(etZipCode.getText().toString());
+                currentContact.setZipCode(etZipCode.getText().toString());
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
@@ -206,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
             @Override
             public void afterTextChanged(Editable s) {
                 String formattedNumber = PhoneNumberUtils.formatNumber(s.toString(), Locale.getDefault().getCountry());
-                currentContact.setContactName(formattedNumber);
+                currentContact.setCellNumber(formattedNumber);
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
@@ -223,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
             @Override
             public void afterTextChanged(Editable s) {
                 String formattedNumber = PhoneNumberUtils.formatNumber(s.toString(), Locale.getDefault().getCountry());
-                currentContact.setContactName(formattedNumber);
+                currentContact.setHomeNumber(formattedNumber);
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
@@ -239,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
 
             @Override
             public void afterTextChanged(Editable s) {
-                currentContact.setContactName(etEmail.getText().toString());
+                currentContact.setEmail(etEmail.getText().toString());
             }
             @Override
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {

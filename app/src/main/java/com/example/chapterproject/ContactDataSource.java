@@ -2,8 +2,11 @@ package com.example.chapterproject;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+
+import java.util.ArrayList;
 
 public class ContactDataSource {
     private SQLiteDatabase database;
@@ -64,5 +67,24 @@ public class ContactDataSource {
         catch (Exception e) {
         }
         return didSucceed;
+    }
+
+    public ArrayList<String> getContactName() {
+        ArrayList<String> contactNames = new ArrayList<>();
+        try {
+            String query = "Select contactName from contact";
+            Cursor cursor = database.rawQuery(query, null);
+
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                contactNames.add(cursor.getString(0));
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
+        catch (Exception e) {
+            contactNames = new ArrayList<String>();
+        }
+        return contactNames;
     }
 }

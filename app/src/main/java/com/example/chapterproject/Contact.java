@@ -56,7 +56,7 @@ public class Contact {
     public String getPhoneNumber(){
         return phoneNumber;
     }
-    public void setPhoneNumber(String s) {
+    public void setHomeNumber(String s) {
         phoneNumber = s;
     }
     public String getCellNumber(){
