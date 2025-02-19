@@ -18,12 +18,16 @@ import java.util.ArrayList;
 
 public class ContactListActivity extends AppCompatActivity {
 
+    ArrayList<Contact> contacts;
+
     private View.OnClickListener onItemClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) view.getTag();
             int position = viewHolder.getAdapterPosition();
+            int contactId = contacts.get(position).getContactID();
             Intent intent = new Intent (ContactListActivity.this, MainActivity.class);
+            intent.putExtra("contactID",contactId);
             startActivity(intent);
         }
     };
@@ -44,16 +48,16 @@ public class ContactListActivity extends AppCompatActivity {
         initSettingButton();
 
         ContactDataSource ds = new ContactDataSource(this);
-        ArrayList<String> names;
+
 
         try{
             ds.open();
-            names = ds.getContactName();
+            contacts = ds.getContacts();
             ds.close();
             RecyclerView contactList = findViewById(R.id.rvContacts);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
             contactList.setLayoutManager(layoutManager);
-            ContactAdapter contactAdapter = new ContactAdapter(names);
+            ContactAdapter contactAdapter = new ContactAdapter(contacts);
             contactAdapter.setOnItemClickListener(onItemClickListener);
             contactList.setAdapter(contactAdapter);
         }
