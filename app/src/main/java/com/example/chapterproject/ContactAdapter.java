@@ -3,6 +3,7 @@ package com.example.chapterproject;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,9 +17,13 @@ public class ContactAdapter extends RecyclerView.Adapter {
 
     public class ContactViewHolder extends RecyclerView.ViewHolder{
         public TextView textViewContact;
+        public TextView textPhone;
+        public Button deleteButton;
         public ContactViewHolder (@NonNull View itemView) {
             super(itemView);
             textViewContact = itemView.findViewById(R.id.textViewName);
+            textPhone = itemView.findViewById(R.id.textPhoneNumber);
+            deleteButton = itemView.findViewById(R.id.buttonDeleteContact);
             itemView.setTag(this);
             itemView.setOnClickListener(mOnItemClickListener);
         }
