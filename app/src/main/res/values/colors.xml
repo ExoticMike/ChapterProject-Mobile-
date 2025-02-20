@@ -5,4 +5,5 @@
     <color name="system_red">#FF0000</color>
     <color name="system_transparent">#00000000</color>
     <color name="system_blue">#0000FF</color>
+    <color name="tool_background">#bebebe</color>
 </resources>

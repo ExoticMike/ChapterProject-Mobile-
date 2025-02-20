@@ -1,9 +1,13 @@
 package com.example.chapterproject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -18,7 +22,8 @@ import java.util.ArrayList;
 
 public class ContactListActivity extends AppCompatActivity {
 
-    ArrayList<Contact> contacts;
+   private ArrayList<Contact> contacts;
+   ContactAdapter contactAdapter;
 
     private View.OnClickListener onItemClickListener = new View.OnClickListener() {
         @Override
@@ -26,8 +31,8 @@ public class ContactListActivity extends AppCompatActivity {
             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder) view.getTag();
             int position = viewHolder.getAdapterPosition();
             int contactId = contacts.get(position).getContactID();
-            Intent intent = new Intent (ContactListActivity.this, MainActivity.class);
-            intent.putExtra("contactID",contactId);
+            Intent intent = new Intent(ContactListActivity.this, MainActivity.class);
+            intent.putExtra("contactID", contactId);
             startActivity(intent);
         }
     };
@@ -46,25 +51,34 @@ public class ContactListActivity extends AppCompatActivity {
         initContactButton();
         initMapButton();
         initSettingButton();
+        initAddContactButton();
+        initDeleteSwitch();
+
+        String sortBy = getSharedPreferences("MyContactListPreferences",
+                Context.MODE_PRIVATE).getString("sortField","contactName");
+        String sortOrder = getSharedPreferences("MyContactListPreferences",
+                Context.MODE_PRIVATE).getString("sortOrder","ASC");
 
         ContactDataSource ds = new ContactDataSource(this);
 
 
-        try{
+        try {
             ds.open();
-            contacts = ds.getContacts();
+            contacts = ds.getContacts(sortBy,sortOrder);
             ds.close();
+
             RecyclerView contactList = findViewById(R.id.rvContacts);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
             contactList.setLayoutManager(layoutManager);
-            ContactAdapter contactAdapter = new ContactAdapter(contacts);
+
+            contactAdapter = new ContactAdapter(contacts, ContactListActivity.this);
             contactAdapter.setOnItemClickListener(onItemClickListener);
             contactList.setAdapter(contactAdapter);
-        }
-        catch (Exception e) {
-            Toast.makeText(this,"Error retrieving contacts", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Error retrieving contacts", Toast.LENGTH_LONG).show();
         }
     }
+
     private void initContactButton() {
         ImageButton ContactButton = findViewById(R.id.ContactButton);
         ContactButton.setOnClickListener(v -> {
@@ -73,6 +87,7 @@ public class ContactListActivity extends AppCompatActivity {
             startActivity(listIntent);
         });
     }
+
     private void initMapButton() {
         ImageButton MapButton = findViewById(R.id.MapButton);
         MapButton.setOnClickListener(v -> {
@@ -81,12 +96,34 @@ public class ContactListActivity extends AppCompatActivity {
             startActivity(listIntent);
         });
     }
+
     private void initSettingButton() {
         ImageButton SettingButton = findViewById(R.id.SettingButton);
         SettingButton.setOnClickListener(v -> {
             Intent listIntent = new Intent(ContactListActivity.this, SettingActivity.class);
             listIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(listIntent);
+        });
+    }
+
+    private void initAddContactButton() {
+        Button newContact = findViewById(R.id.buttonAddContact);
+        newContact.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(ContactListActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+    private void initDeleteSwitch() {
+        Switch s = findViewById(R.id.switchDelete);
+        s.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged (CompoundButton compoundButton,boolean b){
+                Boolean status = compoundButton.isChecked();
+                contactAdapter.setDelete(status);;
+                contactAdapter.notifyDataSetChanged();
+            }
         });
     }
 }

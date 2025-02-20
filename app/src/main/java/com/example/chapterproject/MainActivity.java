@@ -24,9 +24,6 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements DatePickerDialogue.saveDateListener {
 
-    private EditText editName,editTextCity,editTextStreetAddress,editTextState,editTextZipcode,
-            editTextHomeNumber,editTextCellNumber,editTextEmail;
-
     private Contact currentContact;
 
     @Override
@@ -41,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         });
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            initContact(extras.getInt("contactid"));
+            initContact(extras.getInt("contactID"));
         }
         else {
             currentContact = new Contact();
@@ -55,15 +52,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         initTextChangedEvents();
         initSaveButton();
         initChangeButton();
-
-        editName = findViewById(R.id.editName);
-        editTextCity = findViewById(R.id.editTextCity);
-        editTextStreetAddress = findViewById(R.id.editTextStreetAddress);
-        editTextState = findViewById(R.id.editTextState);
-        editTextZipcode = findViewById(R.id.editTextZipcode);
-        editTextHomeNumber = findViewById(R.id.editTextHomeNumber);
-        editTextCellNumber = findViewById(R.id.editTextCellNumber);
-        editTextEmail = findViewById(R.id.editTextEmail);
 
     }
     private void initSaveButton() {
@@ -125,14 +113,14 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         });
     }
     private void setForEdit(boolean enabled){
-        editName = findViewById(R.id.editName);
-        editTextCity = findViewById(R.id.editTextCity);
-        editTextStreetAddress = findViewById(R.id.editTextStreetAddress);
-        editTextState = findViewById(R.id.editTextState);
-        editTextZipcode = findViewById(R.id.editTextZipcode);
-        editTextHomeNumber = findViewById(R.id.editTextHomeNumber);
-        editTextCellNumber = findViewById(R.id.editTextCellNumber);
-        editTextEmail = findViewById(R.id.editTextEmail);
+        EditText editName = findViewById(R.id.editName);
+        EditText editTextCity = findViewById(R.id.editTextCity);
+        EditText editTextStreetAddress = findViewById(R.id.editTextStreetAddress);
+        EditText editTextState = findViewById(R.id.editTextState);
+        EditText editTextZipcode = findViewById(R.id.editTextZipcode);
+        EditText editTextHomeNumber = findViewById(R.id.editTextHomeNumber);
+        EditText editTextCellNumber = findViewById(R.id.editTextCellNumber);
+        EditText editTextEmail = findViewById(R.id.editTextEmail);
         editName.setEnabled(enabled);
         editTextState.setEnabled(enabled);
         editTextStreetAddress.setEnabled(enabled);
