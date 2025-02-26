@@ -36,6 +36,8 @@ public class MapActivity extends AppCompatActivity {
 
     LocationManager locationManager;
     LocationListener gpsListener;
+    LocationListener networkListener;
+    Location currentBestLocation;
     final int PERMISSION_REQUEST_LOCATION = 101;
 
     @Override
@@ -153,6 +155,26 @@ public class MapActivity extends AppCompatActivity {
                 public void onProviderDisabled(String provider) {
                 }
             };
+            networkListener = new LocationListener() {
+                public void onLocationChanged(Location location) {
+                    TextView textLatitude = (TextView) findViewById(R.id.textLatitude);
+                    TextView textLongitude = (TextView) findViewById(R.id.textLongitude);
+                    TextView textAccuracy = (TextView) findViewById(R.id.textAccuracy);
+                    textLatitude.setText(String.valueOf(location.getLatitude()));
+                    textLongitude.setText(String.valueOf(location.getLongitude()));
+                    textAccuracy.setText(String.valueOf(location.getAccuracy()));
+                }
+
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                }
+
+                public void onProviderEnabled(String provider) {
+                }
+
+                public void onProviderDisabled(String provider) {
+                }
+            };
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, networkListener);
 
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpsListener);
         } catch (Exception e) {
@@ -177,12 +199,27 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
+    private boolean isBetterLocation(Location location) {
+        boolean isBetter = false;
+        if (currentBestLocation == null) {
+            isBetter = true;
+        }
+        else if (location.getAccuracy() <= currentBestLocation.getAccuracy()) {
+            isBetter = true;
+        }
+        else if (location.getTime() - currentBestLocation.getTime() > 5*60*1000) {
+            isBetter = true;
+        }
+        return isBetter;
+    }
+
 
     @Override
     public void onPause() {
         super.onPause();
         try {
             locationManager.removeUpdates(gpsListener);
+            locationManager.removeUpdates(networkListener);
         } catch (Exception e) {
             e.printStackTrace();
         }

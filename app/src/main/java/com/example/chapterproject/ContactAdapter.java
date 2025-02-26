@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -78,6 +79,8 @@ public class ContactAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
         ContactViewHolder cvh = (ContactViewHolder) holder;
+        int colors = (position % 2 == 0 ) ? R.color.system_red : R.color.system_blue;
+        ((ContactViewHolder) holder).textViewContact.setTextColor(ContextCompat.getColor(paraentContext, colors));
         cvh.getTextViewContact().setText(contactData.get(position).getContactName());
         cvh.getTextPhone().setText(contactData.get(position).getPhoneNumber());
         cvh.getTextEmail().setText(contactData.get(position).getEmail());
