@@ -36,6 +36,7 @@ public class ContactListActivity extends AppCompatActivity {
             startActivity(intent);
         }
     };
+    RecyclerView contactList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +68,8 @@ public class ContactListActivity extends AppCompatActivity {
             contacts = ds.getContacts(sortBy,sortOrder);
             ds.close();
 
-            RecyclerView contactList = findViewById(R.id.rvContacts);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+            contactList = findViewById(R.id.rvContacts);
             contactList.setLayoutManager(layoutManager);
 
             contactAdapter = new ContactAdapter(contacts, ContactListActivity.this);
@@ -76,6 +77,29 @@ public class ContactListActivity extends AppCompatActivity {
             contactList.setAdapter(contactAdapter);
         } catch (Exception e) {
             Toast.makeText(this, "Error retrieving contacts", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String sortBy = getSharedPreferences("MyContactListPreferences",
+                Context.MODE_PRIVATE).getString("sortField","contactName");
+        String sortOrder = getSharedPreferences("MyContactListPreferences",
+                Context.MODE_PRIVATE).getString("sortOrder","ASC");
+        ContactDataSource ds = new ContactDataSource(this);
+        try {
+            ds.open();
+            contacts = ds.getContacts(sortBy,sortOrder);
+            ds.close();
+            contactList = findViewById(R.id.rvContacts);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+            contactList.setLayoutManager(layoutManager);
+            contactAdapter = new ContactAdapter(contacts, this);
+            contactList.setAdapter(contactAdapter);
+        }
+        catch (Exception e){
+            Toast.makeText(this,"Error retrieving contacts",Toast.LENGTH_LONG).show();
         }
     }
 
