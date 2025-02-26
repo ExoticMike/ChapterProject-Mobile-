@@ -2,6 +2,7 @@ package com.example.chapterproject;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -10,17 +11,20 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import com.google.android.material.snackbar.Snackbar;
+
+
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -44,16 +48,46 @@ public class MapActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        initContactButton();
+        initMapButton();
+        initSettingButton();
         initGetLocationButton();
+    }
+    private void initContactButton() {
+        ImageButton ContactButton = findViewById(R.id.ContactButton);
+        ContactButton.setOnClickListener(v -> {
+            Intent listIntent = new Intent(MapActivity.this, ContactListActivity.class);
+            listIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(listIntent);
+        });
+    }
+
+    private void initMapButton() {
+        ImageButton MapButton = findViewById(R.id.MapButton);
+        MapButton.setOnClickListener(v -> {
+            Intent listIntent = new Intent(MapActivity.this, MapActivity.class);
+            listIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(listIntent);
+        });
+    }
+
+    private void initSettingButton() {
+        ImageButton SettingButton = findViewById(R.id.SettingButton);
+        SettingButton.setOnClickListener(v -> {
+            Intent listIntent = new Intent(MapActivity.this, SettingActivity.class);
+            listIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(listIntent);
+        });
     }
 
     private void initGetLocationButton() {
         Button locationButton = findViewById(R.id.buttonGetLocation);
         locationButton.setOnClickListener(v -> {
-            if (Build.VERSION.SDK_INT >= 23) {
-                if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+            try{
+                if (Build.VERSION.SDK_INT >= 23) {
+                    if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) !=
                         PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(MapActivity.this,
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(MapActivity.this,
                             android.Manifest.permission.ACCESS_FINE_LOCATION)) {
                         Snackbar.make(findViewById(R.id.main), "Location permission is needed to display location", Snackbar.LENGTH_INDEFINITE)
                                 .setAction("OK", v1 -> ActivityCompat.requestPermissions(MapActivity.this, new String[]
@@ -68,7 +102,10 @@ public class MapActivity extends AppCompatActivity {
                 }
             } else {
                 startLocationUpdates();
-            }
+            }}
+            catch (Exception e) {
+                Toast.makeText(getBaseContext(),"Error requesting permission",Toast.LENGTH_LONG).show();
+                }
         });
     }
 
@@ -121,6 +158,22 @@ public class MapActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(getBaseContext(),
                     "Error, Location not available", Toast.LENGTH_LONG).show();
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[],int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUEST_LOCATION: {
+                if (grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    startLocationUpdates();
+                } else {
+                    Toast.makeText(MapActivity.this,"MyContactList will not locate your contacts.",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
