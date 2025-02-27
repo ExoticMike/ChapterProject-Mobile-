@@ -9,8 +9,17 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.os.Build;
 import android.os.Bundle;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.material.snackbar.Snackbar;
 
 
@@ -22,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -32,10 +42,16 @@ import androidx.core.view.WindowInsetsCompat;
 import java.io.IOException;
 import java.util.List;
 
-public class MapActivity extends AppCompatActivity {
+public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    LocationManager locationManager;
-    LocationListener gpsListener;
+    GoogleMap gMap;
+    FusedLocationProviderClient fusedLocationProviderClient;
+    LocationRequest locationRequest;
+    LocationCallback locationCallback;
+
+
+    //LocationManager locationManager;
+    //LocationListener gpsListener;
     final int PERMISSION_REQUEST_LOCATION = 101;
 
     @Override
@@ -43,6 +59,14 @@ public class MapActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_map);
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        SupportMapFragment mapFragment = (SupportMapFragment)
+                getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        createLocationRequest();
+        createLocationCallback();
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.activity_map), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -51,8 +75,9 @@ public class MapActivity extends AppCompatActivity {
         initContactButton();
         initMapButton();
         initSettingButton();
-        initGetLocationButton();
+        //initGetLocationButton();
     }
+
     private void initContactButton() {
         ImageButton ContactButton = findViewById(R.id.ContactButton);
         ContactButton.setOnClickListener(v -> {
@@ -80,97 +105,115 @@ public class MapActivity extends AppCompatActivity {
         });
     }
 
-    private void initGetLocationButton() {
-        Button locationButton = findViewById(R.id.buttonGetLocation);
-        locationButton.setOnClickListener(v -> {
-            try{
-                if (Build.VERSION.SDK_INT >= 23) {
-                    if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) !=
-                        PackageManager.PERMISSION_GRANTED) {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale(MapActivity.this,
-                            android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        Snackbar.make(findViewById(R.id.main), "Location permission is needed to display location", Snackbar.LENGTH_INDEFINITE)
-                                .setAction("OK", v1 -> ActivityCompat.requestPermissions(MapActivity.this, new String[]
-                                        {android.Manifest.permission.ACCESS_FINE_LOCATION}, 1)).show();
+//    private void initGetLocationButton() {
+//        Button locationButton = findViewById(R.id.buttonGetLocation);
+//        locationButton.setOnClickListener(v -> {
+//            try{
+//                if (Build.VERSION.SDK_INT >= 23) {
+//                    if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+//                        PackageManager.PERMISSION_GRANTED) {
+//                        if (ActivityCompat.shouldShowRequestPermissionRationale(MapActivity.this,
+//                            android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+//                        Snackbar.make(findViewById(R.id.main), "Location permission is needed to display location", Snackbar.LENGTH_INDEFINITE)
+//                                .setAction("OK", v1 -> ActivityCompat.requestPermissions(MapActivity.this, new String[]
+//                                        {android.Manifest.permission.ACCESS_FINE_LOCATION}, 1)).show();
+//
+//                    } else {
+//                        ActivityCompat.requestPermissions(MapActivity.this, new String[]
+//                                {android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+//                    }
+//                } else {
+//                    startLocationUpdates();
+//                }
+//            } else {
+//                startLocationUpdates();
+//            }}
+//            catch (Exception e) {
+//                Toast.makeText(getBaseContext(),"Error requesting permission",Toast.LENGTH_LONG).show();
+//                }
+//        });
+//    }
 
-                    } else {
-                        ActivityCompat.requestPermissions(MapActivity.this, new String[]
-                                {android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                    }
-                } else {
-                    startLocationUpdates();
-                }
-            } else {
-                startLocationUpdates();
-            }}
-            catch (Exception e) {
-                Toast.makeText(getBaseContext(),"Error requesting permission",Toast.LENGTH_LONG).show();
-                }
-        });
+//    private void startLocationUpdates() {
+//        if (Build.VERSION.SDK_INT >= 23 &&
+//                ContextCompat.checkSelfPermission(getBaseContext(),
+//                        android.Manifest.permission.ACCESS_FINE_LOCATION) !=
+//                        PackageManager.PERMISSION_GRANTED &&
+//                ContextCompat.checkSelfPermission(getBaseContext(),
+//                        android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
+//                        PackageManager.PERMISSION_GRANTED) {
+//            return;
+//        }
+//        EditText editAddress = (EditText) findViewById(R.id.editAddress);
+//        EditText editCity = (EditText) findViewById(R.id.editCity);
+//        EditText editState = (EditText) findViewById(R.id.editState);
+//        EditText editZipCode = (EditText) findViewById(R.id.editZipCode);
+//
+//        String address = editAddress.getText().toString() + ", " +
+//                editCity.getText().toString() + ", " +
+//                editState.getText().toString() + ", " +
+//                editZipCode.getText().toString();
+//
+//        List<Address> addresses = null;
+//        Geocoder geo = new Geocoder(MapActivity.this);
+//        try {
+//            locationManager = (LocationManager) getBaseContext().
+//                    getSystemService(Context.LOCATION_SERVICE);
+//            gpsListener = new LocationListener() {
+//                public void onLocationChanged(Location location) {
+//                    TextView textLatitude = (TextView) findViewById(R.id.textLatitude);
+//                    TextView textLongitude = (TextView) findViewById(R.id.textLongitude);
+//                    TextView textAccuracy = (TextView) findViewById(R.id.textAccuracy);
+//                    textLatitude.setText(String.valueOf(location.getLatitude()));
+//                    textLongitude.setText(String.valueOf(location.getLongitude()));
+//                    textAccuracy.setText(String.valueOf(location.getAccuracy()));
+//                }
+//
+//                public void onStatusChanged(String provider, int status, Bundle extras) {
+//                }
+//
+//                public void onProviderEnabled(String provider) {
+//                }
+//
+//                public void onProviderDisabled(String provider) {
+//                }
+//            };
+//
+//            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpsListener);
+//        } catch (Exception e) {
+//            Toast.makeText(getBaseContext(),
+//                    "Error, Location not available", Toast.LENGTH_LONG).show();
+//        }
+//    }
+
+    private void createLocationRequest() {
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+
     }
 
-    private void startLocationUpdates() {
-        if (Build.VERSION.SDK_INT >= 23 &&
-                ContextCompat.checkSelfPermission(getBaseContext(),
-                        android.Manifest.permission.ACCESS_FINE_LOCATION) !=
-                        PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(getBaseContext(),
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
-                        PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        EditText editAddress = (EditText) findViewById(R.id.editAddress);
-        EditText editCity = (EditText) findViewById(R.id.editCity);
-        EditText editState = (EditText) findViewById(R.id.editState);
-        EditText editZipCode = (EditText) findViewById(R.id.editZipCode);
-
-        String address = editAddress.getText().toString() + ", " +
-                editCity.getText().toString() + ", " +
-                editState.getText().toString() + ", " +
-                editZipCode.getText().toString();
-
-        List<Address> addresses = null;
-        Geocoder geo = new Geocoder(MapActivity.this);
-        try {
-            locationManager = (LocationManager) getBaseContext().
-                    getSystemService(Context.LOCATION_SERVICE);
-            gpsListener = new LocationListener() {
-                public void onLocationChanged(Location location) {
-                    TextView textLatitude = (TextView) findViewById(R.id.textLatitude);
-                    TextView textLongitude = (TextView) findViewById(R.id.textLongitude);
-                    TextView textAccuracy = (TextView) findViewById(R.id.textAccuracy);
-                    textLatitude.setText(String.valueOf(location.getLatitude()));
-                    textLongitude.setText(String.valueOf(location.getLongitude()));
-                    textAccuracy.setText(String.valueOf(location.getAccuracy()));
-                }
-
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                }
-
-                public void onProviderEnabled(String provider) {
-                }
-
-                public void onProviderDisabled(String provider) {
-                }
-            };
-
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpsListener);
-        } catch (Exception e) {
-            Toast.makeText(getBaseContext(),
-                    "Error, Location not available", Toast.LENGTH_LONG).show();
+    private void createLocationCallback() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(Location) {
+            }
         }
     }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[],int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSION_REQUEST_LOCATION: {
                 if (grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
                     startLocationUpdates();
                 } else {
-                    Toast.makeText(MapActivity.this,"MyContactList will not locate your contacts.",
+                    Toast.makeText(MapActivity.this, "MyContactList will not locate your contacts.",
                             Toast.LENGTH_LONG).show();
                 }
             }
@@ -186,5 +229,10 @@ public class MapActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+
     }
 }
