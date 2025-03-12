@@ -8,13 +8,36 @@
     tools:context=".SettingActivity">
 
     <fragment
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
-        >
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="8dp">
 
     </fragment>
+
+    <RadioGroup
+        android:id="@+id/radioGroupMapType"
+        android:layout_width="102dp"
+        android:layout_height="104dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <RadioButton
+            android:id="@+id/radioButtonNormal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Normal" />
+
+        <RadioButton
+            android:id="@+id/radioButtonSatellite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Satellite" />
+    </RadioGroup>
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -56,5 +79,18 @@
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/settingicon" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textHeading1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="181dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="172dp"
+        android:text="WNW"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

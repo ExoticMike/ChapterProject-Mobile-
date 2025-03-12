@@ -1,10 +1,14 @@
 package com.example.chapterproject;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -14,15 +18,22 @@ import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import android.text.format.DateFormat;
+
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.Calendar;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements DatePickerDialogue.saveDateListener {
+
+    final int PERMISSION_REQUEST_PHONE = 102;
 
     private Contact currentContact;
 
@@ -52,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         initTextChangedEvents();
         initSaveButton();
         initChangeButton();
+        initCallFunction();
 
     }
     private void initSaveButton() {
@@ -80,6 +92,53 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
                 setForEdit(false);
             }
         } );
+    }
+
+    private void initCallFunction() {
+        EditText editPhone = (EditText) findViewById(R.id.editTextHomeNumber);
+        editPhone.setOnLongClickListener(new View.OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View arg0) {
+                checkPhonePermission(currentContact.getPhoneNumber());
+                return false;
+            }
+        });
+
+        EditText editCell = (EditText) findViewById(R.id.editTextCellNumber);
+        editCell.setOnLongClickListener(new View.OnLongClickListener(){
+
+            @Override
+            public boolean onLongClick(View arg0) {
+                checkPhonePermission(currentContact.getCellNumber());
+                return false;
+            }
+        });
+    }
+    private void checkPhonePermission(String phoneNumber) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                        Manifest.permission.CALL_PHONE)) {
+                    Snackbar.make(findViewById(R.id.main), "MyContactList requires this permission to place a call from the app." ,
+                            Snackbar.LENGTH_INDEFINITE).setAction("OK", v -> {ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                            Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_PHONE);}).show();
+                }
+                else{
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[] {Manifest.permission.CALL_PHONE},
+                            PERMISSION_REQUEST_PHONE);
+                }
+            }
+            else{
+                //callContact(phoneNumber);
+            }
+        }
+        else{
+            //callContact(phoneNumber);
+        }
     }
     private void initChangeButton(){
         Button changeButton = findViewById(R.id.ChangeButton);
