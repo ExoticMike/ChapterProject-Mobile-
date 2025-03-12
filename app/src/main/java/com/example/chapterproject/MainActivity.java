@@ -3,11 +3,15 @@ package com.example.chapterproject;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,6 +21,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -34,6 +39,9 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements DatePickerDialogue.saveDateListener {
 
     final int PERMISSION_REQUEST_PHONE = 102;
+    final int PERMISSION_REQUEST_CAMERA = 103;
+    final int PERMISSION_REQUEST_SMS = 104;
+    final int CAMERA_REQUEST = 1888;
 
     private Contact currentContact;
 
@@ -64,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         initSaveButton();
         initChangeButton();
         initCallFunction();
+        initSMSFunction();
+        initImageButton();
 
     }
     private void initSaveButton() {
@@ -105,12 +115,16 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
             }
         });
 
+
+    }
+
+    private void initSMSFunction(){
         EditText editCell = (EditText) findViewById(R.id.editTextCellNumber);
         editCell.setOnLongClickListener(new View.OnLongClickListener(){
 
             @Override
             public boolean onLongClick(View arg0) {
-                checkPhonePermission(currentContact.getCellNumber());
+                checkSMSPermission(currentContact.getCellNumber());
                 return false;
             }
         });
@@ -133,11 +147,92 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
                 }
             }
             else{
-                //callContact(phoneNumber);
+                callContact(phoneNumber);
             }
         }
         else{
-            //callContact(phoneNumber);
+            callContact(phoneNumber);
+        }
+    }
+    private void checkSMSPermission(String cellNumber) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.SEND_SMS)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(
+                        MainActivity.this,
+                        Manifest.permission.SEND_SMS)) {
+                    Snackbar.make(findViewById(R.id.main),
+                                    "MyContactList requires this permission to send a text from the app.",
+                                    Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                                            Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
+                                }
+                            })
+                            .show();
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{ Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
+                }
+            } else {
+                SMSContact(cellNumber);
+            }
+        } else {
+            SMSContact(cellNumber);
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d("Permission", "Request triggered");
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUEST_PHONE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permission to call granted", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Permission to call not granted", Toast.LENGTH_LONG).show();
+                }
+            }
+            case PERMISSION_REQUEST_CAMERA: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    takePhoto();
+                } else {
+                    Toast.makeText(MainActivity.this, "You will not be able to save contact pictures from this app.", Toast.LENGTH_SHORT).show();
+                }
+            }
+            case PERMISSION_REQUEST_SMS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this, "You may now send a sms from this app.", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "You will not be able to send sms from this app.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+     private void callContact(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        if (Build.VERSION.SDK_INT >= 23 &&
+        ContextCompat.checkSelfPermission(getBaseContext(),
+                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        else {
+            startActivity(intent);
+        }
+     }
+    private void SMSContact(String cellNumber) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("smsto:" + cellNumber));
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            if (Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            startActivity(intent);
+        } else {
+            Toast.makeText(MainActivity.this, "No app sms.", Toast.LENGTH_SHORT).show();
         }
     }
     private void initChangeButton(){
@@ -171,6 +266,40 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
             startActivity(listIntent);
         });
     }
+    private void initImageButton() {
+        ImageButton ib = findViewById(R.id.imageContact);
+        ib.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Build.VERSION.SDK_INT >= 23) {
+                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+                            Manifest.permission.CAMERA)
+                            != PackageManager.PERMISSION_GRANTED)  {
+                        if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,android.Manifest.permission.CAMERA)){
+                            Snackbar.make(findViewById(R.id.main), "The app needs permission to take pictures.", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                                        }
+                                    })
+                                    .show();
+                        } else {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+                        }
+                    } else {
+                        takePhoto();
+                    }
+                }
+                else {
+                    takePhoto();
+                }
+            }
+        });
+    }
+    public void takePhoto() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, CAMERA_REQUEST);
+    }
     private void setForEdit(boolean enabled){
         EditText editName = findViewById(R.id.editName);
         EditText editTextCity = findViewById(R.id.editTextCity);
@@ -184,13 +313,17 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialogu
         editTextState.setEnabled(enabled);
         editTextStreetAddress.setEnabled(enabled);
         editTextCity.setEnabled(enabled);
-        editTextHomeNumber.setEnabled(enabled);
         editTextZipcode.setEnabled(enabled);
-        editTextCellNumber.setEnabled(enabled);
         editTextEmail.setEnabled(enabled);
 
         if (enabled){
             editName.requestFocus();
+            editTextCellNumber.setInputType(InputType.TYPE_NULL);
+            editTextHomeNumber.setInputType(InputType.TYPE_NULL);
+        }
+        else {
+            editTextCellNumber.setInputType(InputType.TYPE_CLASS_PHONE);
+            editTextHomeNumber.setInputType(InputType.TYPE_CLASS_PHONE);
         }
     }
     private void initToggleButton(){

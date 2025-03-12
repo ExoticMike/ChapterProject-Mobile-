@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -101,7 +102,63 @@ public class ContactListActivity extends AppCompatActivity {
     public Intent registerReceiver(@Nullable BroadcastReceiver receiver, IntentFilter filter) {
         return super.registerReceiver(batteryReceiver, filter);
     }
+    public void onResume(){
+        super.onResume();
 
+        String sortBy = getSharedPreferences("MyContactListPreferences", Context.MODE_PRIVATE).getString("sortfield", "contactname");
+        String orderBy = getSharedPreferences("MyContactListPreferences", Context.MODE_PRIVATE).getString("sortorder", "ASC");
+
+
+
+        ContactDataSource ContactDataSource = new ContactDataSource(this);
+
+        //ArrayList<Contact> contacts;
+        try {
+            Log.d("DEBUG", "Attempting to open database...");
+            ContactDataSource.open();
+
+            Log.d("DEBUG", "Database opened successfully, retrieving contact names...");
+            contacts = ContactDataSource.getContacts(sortBy, orderBy); // Get contact names
+
+            ContactDataSource.close();
+            Log.d("DEBUG", "Database closed successfully.");
+
+            if (contacts.size() > 0) {
+
+
+                if (contacts == null) {
+                    Log.w("WARNING", "getContactName() returned null. Initializing empty list.");
+                    contacts = new ArrayList<>(); // Prevent null crash
+                }
+
+                RecyclerView contactList = findViewById(R.id.rvContacts);
+                if (contactList == null) {
+                    Log.e("ERROR", "RecyclerView rvContacts not found in layout");
+                    Toast.makeText(this, "RecyclerView not found", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                Log.d("DEBUG", "Setting up RecyclerView...");
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+                contactList.setLayoutManager(layoutManager);
+
+                contactAdapter = new ContactAdapter(contacts, this);
+                contactAdapter.setOnItemClickListener(onItemClickListener);
+                contactList.setAdapter(contactAdapter);
+            } else {
+                Intent intent = new Intent(ContactListActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+
+
+            Log.d("DEBUG", "Contacts loaded successfully");
+        } catch (Exception e) {
+            Log.e("ERROR", "Exception retrieving contacts", e);
+            Toast.makeText(this, "Error retrieving contacts", Toast.LENGTH_LONG).show();
+        }
+
+    }
+/*
     @Override
     public void onResume() {
         super.onResume();
@@ -114,6 +171,7 @@ public class ContactListActivity extends AppCompatActivity {
             ds.open();
             contacts = ds.getContacts(sortBy,sortOrder);
             ds.close();
+
             contactList = findViewById(R.id.rvContacts);
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
             contactList.setLayoutManager(layoutManager);
@@ -123,7 +181,7 @@ public class ContactListActivity extends AppCompatActivity {
         catch (Exception e){
             Toast.makeText(this,"Error retrieving contacts",Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 
     private void initContactButton() {
         ImageButton ContactButton = findViewById(R.id.ContactButton);
